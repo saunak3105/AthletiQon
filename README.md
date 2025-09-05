@@ -1,4 +1,4 @@
-# 🐄 athletiQon – train, test, triumph
+# athletiQon – train, test, triumph
 
 An **AI-powered livestock recognition system** for accurate identification of **cattle (cow)** and **buffaloes** from images.  
 Built for **Smart India Hackathon 2025 (SIH25004)**.  
