@@ -1,0 +1,28 @@
+{
+  "placeholderImages": [
+    {
+      "id": "carousel-1",
+      "description": "Athlete tying shoelaces before a run.",
+      "imageUrl": "https://picsum.photos/seed/c1/1200/800",
+      "imageHint": "athlete running"
+    },
+    {
+      "id": "carousel-2",
+      "description": "Person doing yoga in a bright room.",
+      "imageUrl": "https://picsum.photos/seed/c2/1200/800",
+      "imageHint": "fitness workout"
+    },
+    {
+      "id": "carousel-3",
+      "description": "A trophy on a podium.",
+      "imageUrl": "https://picsum.photos/seed/c3/1200/800",
+      "imageHint": "trophy achievement"
+    },
+    {
+      "id": "avatar-1",
+      "description": "A placeholder avatar image.",
+      "imageUrl": "https://picsum.photos/seed/avatar1/100/100",
+      "imageHint": "profile portrait"
+    }
+  ]
+}
