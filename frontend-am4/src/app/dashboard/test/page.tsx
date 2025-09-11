@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Dynamic import to prevent SSR issues with camera/socket components
 const PushupDetector = dynamic(
-  () => import("@/components/pushup/PushupDetector"),
+  () => import("@/components/pushup/PushupDetector").then(mod => ({ default: mod.PushupDetector })),
   { 
     ssr: false,
     loading: () => (
