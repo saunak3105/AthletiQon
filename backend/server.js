@@ -42,16 +42,31 @@ app.get('/api/health', (req, res) => {
 });
 
 // Real-time pose detection via WebSocket
+const socketSessionMap = new Map(); // Map socket.id to sessionId
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
   socket.on('video-frame', async (data) => {
     try {
+      const sessionId = socketSessionMap.get(socket.id);
+      if (!sessionId) {
+        socket.emit('pose-error', { error: 'No active session' });
+        return;
+      }
+
       const result = await poseService.detectPose(data.frame);
+      
+      // Update pushup count based on pose analysis
+      const updatedSession = poseService.updatePushupCount(sessionId, result);
+      
       socket.emit('pose-detected', {
         poses: result.poses,
-        pushupCount: result.pushupCount,
+        pushupCount: updatedSession ? updatedSession.pushupCount : 0,
+        validReps: updatedSession ? updatedSession.validReps : 0,
         feedback: result.feedback,
+        pushupPhase: result.pushupPhase,
+        isValidPose: result.isValidPose,
         timestamp: Date.now()
       });
     } catch (error) {
@@ -61,18 +76,28 @@ io.on('connection', (socket) => {
   });
 
   socket.on('start-pushup-session', (data) => {
-    poseService.startPushupSession(socket.id, data);
-    socket.emit('session-started', { sessionId: socket.id });
+    const sessionId = data.sessionId || `session_${Date.now()}_${socket.id}`;
+    socketSessionMap.set(socket.id, sessionId);
+    poseService.startPushupSession(sessionId, data);
+    socket.emit('session-started', { sessionId });
   });
 
   socket.on('end-pushup-session', async () => {
-    const sessionResults = await poseService.endPushupSession(socket.id);
-    socket.emit('session-ended', sessionResults);
+    const sessionId = socketSessionMap.get(socket.id);
+    if (sessionId) {
+      const sessionResults = await poseService.endPushupSession(sessionId);
+      socketSessionMap.delete(socket.id);
+      socket.emit('session-ended', sessionResults);
+    }
   });
 
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
-    poseService.cleanupSession(socket.id);
+    const sessionId = socketSessionMap.get(socket.id);
+    if (sessionId) {
+      poseService.cleanupSession(sessionId);
+      socketSessionMap.delete(socket.id);
+    }
   });
 });
 
