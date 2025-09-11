@@ -41,6 +41,8 @@ export function PushupDetector() {
 
   // Initialize WebSocket connection
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const socketConnection = io('http://localhost:3001');
     
     socketConnection.on('connect', () => {
