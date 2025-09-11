@@ -14,8 +14,9 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5000",
-    methods: ["GET", "POST"]
+    origin: ["http://localhost:5000", "http://0.0.0.0:5000", "*"],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
@@ -45,7 +46,7 @@ app.get('/api/health', (req, res) => {
 const socketSessionMap = new Map(); // Map socket.id to sessionId
 
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+  console.log('🔌 Socket client connected:', socket.id);
 
   socket.on('video-frame', async (data) => {
     try {

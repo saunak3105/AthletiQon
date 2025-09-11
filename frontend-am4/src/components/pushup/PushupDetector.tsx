@@ -43,11 +43,21 @@ export function PushupDetector() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    const socketConnection = io('http://localhost:3001');
+    const socketConnection = io('http://localhost:3001', {
+      forceNew: true,
+      reconnection: true,
+      timeout: 10000,
+      transports: ['websocket', 'polling']
+    });
     
     socketConnection.on('connect', () => {
-      console.log('Connected to pose detection service');
+      console.log('✅ Connected to pose detection service');
       setSocket(socketConnection);
+    });
+
+    socketConnection.on('disconnect', () => {
+      console.log('❌ Disconnected from pose detection service');
+      setSocket(null);
     });
 
     socketConnection.on('pose-detected', (data: any) => {
@@ -74,10 +84,14 @@ export function PushupDetector() {
       console.error('Pose detection error:', error);
     });
 
+    socketConnection.on('connect_error', (error: any) => {
+      console.error('Socket connection error:', error);
+    });
+
     return () => {
       socketConnection.disconnect();
     };
-  }, [session]);
+  }, []); // Remove session dependency to prevent reconnections
 
   // Timer for elapsed time
   useEffect(() => {
@@ -99,8 +113,8 @@ export function PushupDetector() {
   const startSession = useCallback(async () => {
     try {
       // First ensure we have a socket connection
-      if (!socket) {
-        console.error('No socket connection');
+      if (!socket || !socket.connected) {
+        console.error('No socket connection - socket:', !!socket, 'connected:', socket?.connected);
         return;
       }
 
